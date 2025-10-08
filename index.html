@@ -449,9 +449,9 @@
         </div>
         <nav class="sidebar-nav">
             <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link active" href="#" data-page="dashboard"><i class="bi bi-speedometer2"></i><span>لوحة التحكم</span></a></li>
-                <li class="nav-item"><a class="nav-link" href="#" data-page="calculate-product"><i class="bi bi-calculator"></i><span>حساب تكلفة المنتج</span></a></li>
-                <li class="nav-item"><a class="nav-link" href="#" data-page="manage-products"><i class="bi bi-box-seam"></i><span>إدارة المنتجات</span></a></li>
+                <li class="nav-item"><a class="nav-link active" href="#dashboard" data-page="dashboard"><i class="bi bi-speedometer2"></i><span>لوحة التحكم</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="#calculate-product" data-page="calculate-product"><i class="bi bi-calculator"></i><span>حساب تكلفة المنتج</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="#manage-products" data-page="manage-products"><i class="bi bi-box-seam"></i><span>إدارة المنتجات</span></a></li>
             </ul>
         </nav>
     </div>
@@ -872,6 +872,21 @@
         let currentCurrency = 'د.ب';
         let currencyDecimals = 3;
 
+        // نظام التوجيه (Routing)
+        function initRouting() {
+            // معالجة التغيير في الـ hash
+            function handleHashChange() {
+                const hash = window.location.hash.substring(1) || 'dashboard';
+                showPage(hash);
+            }
+
+            // إضافة حدث الاستماع لتغيير الـ hash
+            window.addEventListener('hashchange', handleHashChange);
+            
+            // معالجة الـ hash الحالي عند تحميل الصفحة
+            handleHashChange();
+        }
+
         function showPage(pageId){
             document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
             document.getElementById(pageId)?.classList.add('active');
@@ -883,6 +898,9 @@
             });
             document.getElementById('sidebar').classList.remove('show');
             
+            // تحديث عنوان الصفحة
+            document.title = `برنامج بيزة - ${getPageTitle(pageId)}`;
+            
             // تحديث الجداول عند عرض الصفحات
             if (pageId === 'manage-products') {
                 updateProductsTable();
@@ -891,14 +909,30 @@
             }
         }
 
+        function getPageTitle(pageId) {
+            const titles = {
+                'dashboard': 'لوحة التحكم',
+                'calculate-product': 'حساب تكلفة المنتج',
+                'manage-products': 'إدارة المنتجات'
+            };
+            return titles[pageId] || 'برنامج بيزة';
+        }
+
+        // تعديل حدث النقر على الروابط
         document.addEventListener('click', function(e){
             if(e.target.closest('[data-page]')){
                 e.preventDefault();
-                showPage(e.target.closest('[data-page]').getAttribute('data-page'));
+                const pageId = e.target.closest('[data-page]').getAttribute('data-page');
+                
+                // تحديث الـ hash في الرابط
+                window.location.hash = pageId;
+                
+                showPage(pageId);
             }
         });
 
-        showPage('dashboard');
+        // بدء نظام التوجيه
+        initRouting();
 
         document.getElementById('product-code').value = "PRD-" + String(productCounter).padStart(4, '0');
 
@@ -1138,6 +1172,9 @@
         function editProduct(index) {
             const product = products[index];
             editingIndex = index;
+            
+            // الانتقال إلى صفحة حساب التكلفة
+            window.location.hash = 'calculate-product';
             showPage('calculate-product');
             
             // تعبئة البيانات الأساسية
@@ -1389,6 +1426,9 @@
             updateDashboard();
             clearForm();
             alert('تم حفظ المنتج بنجاح!');
+            
+            // العودة إلى صفحة إدارة المنتجات بعد الحفظ
+            window.location.hash = 'manage-products';
             showPage('manage-products');
         }
 
