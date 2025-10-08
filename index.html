@@ -382,6 +382,45 @@
             color: var(--text-primary);
         }
         
+        /* أنماط المعاينة */
+        .preview-modal .modal-content {
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .preview-modal .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border-bottom: none;
+        }
+        
+        .preview-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .preview-item {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            border: 2px solid var(--border-color);
+        }
+        
+        .preview-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .preview-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
         @media (max-width: 768px) {
             .sidebar { transform: translateX(100%); }
             .sidebar.show { transform: translateX(0); }
@@ -414,16 +453,6 @@
                     <i class="bi bi-box-seam-fill stat-icon"></i>
                     <div class="stat-value" id="dashboard-products">0</div>
                     <div class="stat-label">إجمالي المنتجات</div>
-                </div>
-                <div class="stat-card">
-                    <i class="bi bi-currency-dollar stat-icon"></i>
-                    <div class="stat-value" id="dashboard-revenue">0.000 د.ب</div>
-                    <div class="stat-label">إجمالي الإيرادات</div>
-                </div>
-                <div class="stat-card">
-                    <i class="bi bi-graph-up stat-icon"></i>
-                    <div class="stat-value" id="dashboard-profit">0.000 د.ب</div>
-                    <div class="stat-label">إجمالي الأرباح</div>
                 </div>
                 <div class="stat-card">
                     <i class="bi bi-calculator stat-icon"></i>
@@ -726,14 +755,79 @@
         </div>
     </div>
 
+    <!-- نافذة معاينة المنتج -->
+    <div class="modal fade preview-modal" id="productPreviewModal" tabindex="-1" aria-labelledby="productPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productPreviewModalLabel"><i class="bi bi-eye"></i> معاينة المنتج</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>معلومات المنتج</h6>
+                            <div class="preview-item">
+                                <div class="preview-label">اسم المنتج</div>
+                                <div class="preview-value" id="preview-product-name">-</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">رمز المنتج</div>
+                                <div class="preview-value" id="preview-product-code">-</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">عدد القطع في العلبة</div>
+                                <div class="preview-value" id="preview-product-quantity">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>التكاليف والأسعار</h6>
+                            <div class="preview-item">
+                                <div class="preview-label">التكلفة الإجمالية</div>
+                                <div class="preview-value" id="preview-total-cost">-</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">سعر البيع</div>
+                                <div class="preview-value" id="preview-final-price">-</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">هامش الربح</div>
+                                <div class="preview-value" id="preview-profit-margin">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview-summary mt-4">
+                        <div class="preview-item">
+                            <div class="preview-label">تكلفة المواد</div>
+                            <div class="preview-value" id="preview-material-cost">-</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">تكلفة التغليف</div>
+                            <div class="preview-value" id="preview-packaging-cost">-</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">اليد العاملة</div>
+                            <div class="preview-value" id="preview-labor-cost">-</div>
+                        </div>
+                        <div class="preview-item">
+                            <div class="preview-label">إهلاك المعدات</div>
+                            <div class="preview-value" id="preview-depreciation-cost">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // قاعدة بيانات محلية لتخزين البيانات
         let appData = {
             products: [],
-            calculations: 0,
-            totalRevenue: 0,
-            totalProfit: 0
+            calculations: 0
         };
 
         // محاولة تحميل البيانات من localStorage
@@ -953,25 +1047,6 @@
         function updateDashboard() {
             document.getElementById('dashboard-products').textContent = products.length;
             document.getElementById('dashboard-calculations').textContent = appData.calculations;
-            
-            // حساب الإيرادات والأرباح
-            let totalRevenue = 0;
-            let totalProfit = 0;
-            
-            products.forEach(product => {
-                const price = parseFloat(product.finalPrice.replace(/[^0-9.]/g, ''));
-                const cost = parseFloat(product.totalCost.replace(/[^0-9.]/g, ''));
-                totalRevenue += price;
-                totalProfit += (price - cost);
-            });
-            
-            document.getElementById('dashboard-revenue').textContent = formatCurrency(totalRevenue);
-            document.getElementById('dashboard-profit').textContent = formatCurrency(totalProfit);
-            
-            // تحديث البيانات في التخزين
-            appData.totalRevenue = totalRevenue;
-            appData.totalProfit = totalProfit;
-            saveData();
         }
 
         function updateProductsTable() {
@@ -993,6 +1068,7 @@
                     <td>
                         <button class="btn btn-primary-modern btn-action" onclick="editProduct(${index})"><i class="bi bi-pencil"></i></button>
                         <button class="btn btn-danger-modern btn-action" onclick="deleteProduct(${index})"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-info btn-action" onclick="previewProduct(${index})"><i class="bi bi-eye"></i></button>
                     </td>`;
                 tbody.appendChild(tr);
             });
@@ -1003,13 +1079,67 @@
             editingIndex = index;
             showPage('calculate-product');
             
+            // تعبئة البيانات في النموذج
             document.getElementById('product-name').value = product.name;
             document.getElementById('product-code').value = product.code;
             document.getElementById('sale-quantity').value = product.quantity;
             const profitRateText = product.profitRate.replace('%', '');
             document.getElementById('profit-rate').value = profitRateText;
             document.getElementById('final-price-input').value = parseFloat(product.finalPrice.replace(/[^0-9.]/g, ''));
+            
+            // تعبئة بيانات إضافية إذا كانت موجودة
+            if (product.depreciationRate) {
+                document.getElementById('depreciation-rate').value = product.depreciationRate;
+            }
+            
+            if (product.laborData) {
+                // تعبئة بيانات اليد العاملة إذا كانت محفوظة
+                const salaryInput = document.querySelector('.salary');
+                const hoursInput = document.querySelector('.hours');
+                const piecesInput = document.querySelector('.pieces');
+                
+                if (salaryInput && product.laborData.salary) {
+                    salaryInput.value = product.laborData.salary;
+                }
+                if (hoursInput && product.laborData.hours) {
+                    hoursInput.value = product.laborData.hours;
+                }
+                if (piecesInput && product.laborData.pieces) {
+                    piecesInput.value = product.laborData.pieces;
+                }
+            }
+            
             updateCosts();
+        }
+
+        function previewProduct(index) {
+            const product = products[index];
+            
+            // تعبئة بيانات المعاينة
+            document.getElementById('preview-product-name').textContent = product.name;
+            document.getElementById('preview-product-code').textContent = product.code;
+            document.getElementById('preview-product-quantity').textContent = product.quantity;
+            document.getElementById('preview-total-cost').textContent = product.totalCost;
+            document.getElementById('preview-final-price').textContent = product.finalPrice;
+            document.getElementById('preview-profit-margin').textContent = product.profitMargin;
+            
+            // تعبئة البيانات الإضافية إذا كانت موجودة
+            if (product.materialCost) {
+                document.getElementById('preview-material-cost').textContent = product.materialCost;
+            }
+            if (product.packagingCost) {
+                document.getElementById('preview-packaging-cost').textContent = product.packagingCost;
+            }
+            if (product.laborCost) {
+                document.getElementById('preview-labor-cost').textContent = product.laborCost;
+            }
+            if (product.depreciationCost) {
+                document.getElementById('preview-depreciation-cost').textContent = product.depreciationCost;
+            }
+            
+            // عرض نافذة المعاينة
+            const previewModal = new bootstrap.Modal(document.getElementById('productPreviewModal'));
+            previewModal.show();
         }
 
         function deleteProduct(index) {
@@ -1101,7 +1231,9 @@
             const qty=document.getElementById('sale-quantity').value;
             const profitRate=document.getElementById('profit-rate').value;
             const finalPrice=document.getElementById('final-price-input').value;
+            const depreciationRate=document.getElementById('depreciation-rate').value;
             
+            // جمع بيانات إضافية للحفظ
             const product = {
                 code: code,
                 name: name,
@@ -1109,7 +1241,19 @@
                 totalCost: document.getElementById('grand-total-cost').textContent,
                 finalPrice: formatCurrency(parseFloat(finalPrice)),
                 profitRate: profitRate + '%',
-                profitMargin: document.getElementById('final-profit').textContent
+                profitMargin: document.getElementById('final-profit').textContent,
+                // حفظ بيانات إضافية للمعاينة
+                materialCost: document.getElementById('material-summary').textContent,
+                packagingCost: document.getElementById('packaging-summary').textContent,
+                laborCost: document.getElementById('labor-summary').textContent,
+                depreciationCost: document.getElementById('depreciation-summary').textContent,
+                depreciationRate: depreciationRate,
+                // حفظ بيانات اليد العاملة
+                laborData: {
+                    salary: document.querySelector('.salary').value,
+                    hours: document.querySelector('.hours').value,
+                    pieces: document.querySelector('.pieces').value
+                }
             };
             
             if(editingIndex >= 0) {
