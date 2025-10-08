@@ -183,6 +183,10 @@
             background: linear-gradient(135deg, var(--error), #ff5252);
             color: white;
         }
+        .btn-warning-modern {
+            background: linear-gradient(135deg, var(--warning), #ffb74d);
+            color: white;
+        }
         .table-modern {
             background: var(--surface);
             border-radius: 16px;
@@ -229,6 +233,14 @@
         .stat-label {
             font-size: 1rem;
             color: var(--text-secondary);
+        }
+        .status-active {
+            color: var(--success);
+            font-weight: 600;
+        }
+        .status-inactive {
+            color: var(--error);
+            font-weight: 600;
         }
         .summary-boxes {
             display: grid;
@@ -455,9 +467,14 @@
                     <div class="stat-label">إجمالي المنتجات</div>
                 </div>
                 <div class="stat-card">
-                    <i class="bi bi-calculator stat-icon"></i>
-                    <div class="stat-value" id="dashboard-calculations">0</div>
-                    <div class="stat-label">حسابات التكلفة</div>
+                    <i class="bi bi-check-circle-fill stat-icon"></i>
+                    <div class="stat-value" id="dashboard-active-products">0</div>
+                    <div class="stat-label">المنتجات المفعلة</div>
+                </div>
+                <div class="stat-card">
+                    <i class="bi bi-x-circle-fill stat-icon"></i>
+                    <div class="stat-value" id="dashboard-inactive-products">0</div>
+                    <div class="stat-label">المنتجات غير المفعلة</div>
                 </div>
             </div>
         </div>
@@ -741,7 +758,7 @@
                                     <th>عدد القطع</th>
                                     <th>التكلفة الكلية</th>
                                     <th>السعر</th>
-                                    <th>هامش الربح</th>
+                                    <th>الحالة</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
@@ -778,6 +795,10 @@
                             <div class="preview-item">
                                 <div class="preview-label">عدد القطع في العلبة</div>
                                 <div class="preview-value" id="preview-product-quantity">-</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-label">الحالة</div>
+                                <div class="preview-value" id="preview-product-status">-</div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -826,8 +847,7 @@
     <script>
         // قاعدة بيانات محلية لتخزين البيانات
         let appData = {
-            products: [],
-            calculations: 0
+            products: []
         };
 
         // محاولة تحميل البيانات من localStorage
@@ -1063,8 +1083,13 @@
         }
 
         function updateDashboard() {
-            document.getElementById('dashboard-products').textContent = products.length;
-            document.getElementById('dashboard-calculations').textContent = appData.calculations;
+            const totalProducts = products.length;
+            const activeProducts = products.filter(product => product.active).length;
+            const inactiveProducts = totalProducts - activeProducts;
+
+            document.getElementById('dashboard-products').textContent = totalProducts;
+            document.getElementById('dashboard-active-products').textContent = activeProducts;
+            document.getElementById('dashboard-inactive-products').textContent = inactiveProducts;
         }
 
         function updateProductsTable() {
@@ -1075,6 +1100,12 @@
             }
             tbody.innerHTML = '';
             products.forEach((product, index) => {
+                const statusClass = product.active ? 'status-active' : 'status-inactive';
+                const statusText = product.active ? 'مفعل' : 'غير مفعل';
+                const toggleButtonClass = product.active ? 'btn-warning-modern' : 'btn-success-modern';
+                const toggleButtonIcon = product.active ? 'bi-x-circle' : 'bi-check-circle';
+                const toggleButtonText = product.active ? 'إلغاء التفعيل' : 'تفعيل';
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${product.code}</td>
@@ -1082,14 +1113,26 @@
                     <td>${product.quantity}</td>
                     <td>${product.totalCost}</td>
                     <td>${product.finalPrice}</td>
-                    <td>${product.profitMargin}</td>
+                    <td class="${statusClass}">${statusText}</td>
                     <td>
                         <button class="btn btn-primary-modern btn-action" onclick="editProduct(${index})"><i class="bi bi-pencil"></i></button>
                         <button class="btn btn-danger-modern btn-action" onclick="deleteProduct(${index})"><i class="bi bi-trash"></i></button>
                         <button class="btn btn-info btn-action" onclick="previewProduct(${index})"><i class="bi bi-eye"></i></button>
+                        <button class="btn ${toggleButtonClass} btn-action" onclick="toggleProductStatus(${index})"><i class="bi ${toggleButtonIcon}"></i></button>
                     </td>`;
                 tbody.appendChild(tr);
             });
+        }
+
+        function toggleProductStatus(index) {
+            products[index].active = !products[index].active;
+            appData.products = products;
+            saveData();
+            updateProductsTable();
+            updateDashboard();
+            
+            const status = products[index].active ? 'مفعل' : 'غير مفعل';
+            alert(`تم ${products[index].active ? 'تفعيل' : 'إلغاء تفعيل'} المنتج بنجاح!`);
         }
 
         function editProduct(index) {
@@ -1164,6 +1207,8 @@
             document.getElementById('preview-total-cost').textContent = product.totalCost;
             document.getElementById('preview-final-price').textContent = product.finalPrice;
             document.getElementById('preview-profit-margin').textContent = product.profitMargin;
+            document.getElementById('preview-product-status').textContent = product.active ? 'مفعل' : 'غير مفعل';
+            document.getElementById('preview-product-status').className = product.active ? 'status-active' : 'status-inactive';
             
             // تعبئة البيانات الإضافية إذا كانت موجودة
             if (product.materialCost) {
@@ -1316,6 +1361,7 @@
                 finalPrice: formatCurrency(parseFloat(finalPrice)),
                 profitRate: profitRate + '%',
                 profitMargin: document.getElementById('final-profit').textContent,
+                active: true, // المنتج يكون مفعل افتراضياً عند الحفظ
                 // حفظ بيانات إضافية للمعاينة
                 materialCost: document.getElementById('material-summary').textContent,
                 packagingCost: document.getElementById('packaging-summary').textContent,
@@ -1329,11 +1375,12 @@
             };
             
             if(editingIndex >= 0) {
+                // الحفاظ على حالة التفعيل عند التعديل
+                product.active = products[editingIndex].active;
                 products[editingIndex] = product;
                 editingIndex = -1;
             } else {
                 products.push(product);
-                appData.calculations++;
             }
             
             appData.products = products;
