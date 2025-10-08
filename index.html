@@ -617,12 +617,12 @@
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="materials-tbody">
                                 <tr>
-                                    <td class="product-name-col"><input type="text" class="form-control-modern" required></td>
-                                    <td><input type="number" class="form-control-modern" required></td>
-                                    <td class="price-input-container"><input type="number" class="form-control-modern" step="0.001" required></td>
-                                    <td><input type="number" class="form-control-modern" required></td>
+                                    <td class="product-name-col"><input type="text" class="form-control-modern material-name" required></td>
+                                    <td><input type="number" class="form-control-modern material-count" required></td>
+                                    <td class="price-input-container"><input type="number" class="form-control-modern material-price" step="0.001" required></td>
+                                    <td><input type="number" class="form-control-modern material-used" required></td>
                                     <td class="material-cost">0.000 د.ب</td>
                                     <td><button class="btn btn-danger-modern btn-action remove-row"><i class="bi bi-trash"></i></button></td>
                                 </tr>
@@ -653,12 +653,12 @@
                                     <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="packaging-tbody">
                                 <tr>
-                                    <td class="product-name-col"><input type="text" class="form-control-modern" required></td>
-                                    <td><input type="number" class="form-control-modern" required></td>
-                                    <td class="price-input-container"><input type="number" class="form-control-modern" step="0.001" required></td>
-                                    <td><input type="number" class="form-control-modern" required></td>
+                                    <td class="product-name-col"><input type="text" class="form-control-modern packaging-name" required></td>
+                                    <td><input type="number" class="form-control-modern packaging-count" required></td>
+                                    <td class="price-input-container"><input type="number" class="form-control-modern packaging-price" step="0.001" required></td>
+                                    <td><input type="number" class="form-control-modern packaging-used" required></td>
                                     <td class="packaging-cost">0.000 د.ب</td>
                                     <td><button class="btn btn-danger-modern btn-action remove-row"><i class="bi bi-trash"></i></button></td>
                                 </tr>
@@ -992,18 +992,18 @@
             const newRow=document.createElement('tr');
             if(tableId==='materials-table'){
                 newRow.innerHTML=`
-                    <td class="product-name-col"><input type="text" class="form-control-modern" required></td>
-                    <td><input type="number" class="form-control-modern" required></td>
-                    <td class="price-input-container"><input type="number" class="form-control-modern" step="0.001" required></td>
-                    <td><input type="number" class="form-control-modern" required></td>
+                    <td class="product-name-col"><input type="text" class="form-control-modern material-name" required></td>
+                    <td><input type="number" class="form-control-modern material-count" required></td>
+                    <td class="price-input-container"><input type="number" class="form-control-modern material-price" step="0.001" required></td>
+                    <td><input type="number" class="form-control-modern material-used" required></td>
                     <td class="material-cost">0.000 د.ب</td>
                     <td><button class="btn btn-danger-modern btn-action remove-row"><i class="bi bi-trash"></i></button></td>`;
             }else if(tableId==='packaging-table'){
                 newRow.innerHTML=`
-                    <td class="product-name-col"><input type="text" class="form-control-modern" required></td>
-                    <td><input type="number" class="form-control-modern" required></td>
-                    <td class="price-input-container"><input type="number" class="form-control-modern" step="0.001" required></td>
-                    <td><input type="number" class="form-control-modern" required></td>
+                    <td class="product-name-col"><input type="text" class="form-control-modern packaging-name" required></td>
+                    <td><input type="number" class="form-control-modern packaging-count" required></td>
+                    <td class="price-input-container"><input type="number" class="form-control-modern packaging-price" step="0.001" required></td>
+                    <td><input type="number" class="form-control-modern packaging-used" required></td>
                     <td class="packaging-cost">0.000 د.ب</td>
                     <td><button class="btn btn-danger-modern btn-action remove-row"><i class="bi bi-trash"></i></button></td>`;
             }
@@ -1030,15 +1030,33 @@
             document.getElementById('profit-rate').value='';
             document.getElementById('final-price-input').value='';
             document.getElementById('depreciation-rate').value='';
-            document.querySelectorAll('#materials-table tbody tr, #packaging-table tbody tr').forEach(row => {
-                if(row.parentElement.children.length > 1) row.remove();
-            });
-            document.querySelectorAll('#materials-table tbody tr input, #packaging-table tbody tr input').forEach(input => {
-                input.value = '';
-            });
-            document.querySelectorAll('#workers-table-1 tbody tr input, #workers-table-2 tbody tr input').forEach(input => {
-                input.value = '';
-            });
+            
+            // مسح جداول المواد والتغليف
+            document.getElementById('materials-tbody').innerHTML = `
+                <tr>
+                    <td class="product-name-col"><input type="text" class="form-control-modern material-name" required></td>
+                    <td><input type="number" class="form-control-modern material-count" required></td>
+                    <td class="price-input-container"><input type="number" class="form-control-modern material-price" step="0.001" required></td>
+                    <td><input type="number" class="form-control-modern material-used" required></td>
+                    <td class="material-cost">0.000 د.ب</td>
+                    <td><button class="btn btn-danger-modern btn-action remove-row"><i class="bi bi-trash"></i></button></td>
+                </tr>`;
+            
+            document.getElementById('packaging-tbody').innerHTML = `
+                <tr>
+                    <td class="product-name-col"><input type="text" class="form-control-modern packaging-name" required></td>
+                    <td><input type="number" class="form-control-modern packaging-count" required></td>
+                    <td class="price-input-container"><input type="number" class="form-control-modern packaging-price" step="0.001" required></td>
+                    <td><input type="number" class="form-control-modern packaging-used" required></td>
+                    <td class="packaging-cost">0.000 د.ب</td>
+                    <td><button class="btn btn-danger-modern btn-action remove-row"><i class="bi bi-trash"></i></button></td>
+                </tr>`;
+            
+            // مسح بيانات اليد العاملة
+            document.querySelector('.salary').value = '';
+            document.querySelector('.hours').value = '';
+            document.querySelector('.pieces').value = '';
+            
             productCounter++;
             document.getElementById('product-code').value = "PRD-" + String(productCounter).padStart(4, '0');
             updateCosts();
@@ -1079,7 +1097,7 @@
             editingIndex = index;
             showPage('calculate-product');
             
-            // تعبئة البيانات في النموذج
+            // تعبئة البيانات الأساسية
             document.getElementById('product-name').value = product.name;
             document.getElementById('product-code').value = product.code;
             document.getElementById('sale-quantity').value = product.quantity;
@@ -1087,26 +1105,50 @@
             document.getElementById('profit-rate').value = profitRateText;
             document.getElementById('final-price-input').value = parseFloat(product.finalPrice.replace(/[^0-9.]/g, ''));
             
-            // تعبئة بيانات إضافية إذا كانت موجودة
+            // تعبئة بيانات إهلاك المعدات
             if (product.depreciationRate) {
                 document.getElementById('depreciation-rate').value = product.depreciationRate;
             }
             
+            // تعبئة بيانات اليد العاملة
             if (product.laborData) {
-                // تعبئة بيانات اليد العاملة إذا كانت محفوظة
-                const salaryInput = document.querySelector('.salary');
-                const hoursInput = document.querySelector('.hours');
-                const piecesInput = document.querySelector('.pieces');
-                
-                if (salaryInput && product.laborData.salary) {
-                    salaryInput.value = product.laborData.salary;
-                }
-                if (hoursInput && product.laborData.hours) {
-                    hoursInput.value = product.laborData.hours;
-                }
-                if (piecesInput && product.laborData.pieces) {
-                    piecesInput.value = product.laborData.pieces;
-                }
+                document.querySelector('.salary').value = product.laborData.salary || '';
+                document.querySelector('.hours').value = product.laborData.hours || '';
+                document.querySelector('.pieces').value = product.laborData.pieces || '';
+            }
+            
+            // تعبئة بيانات المواد
+            if (product.materialsData && product.materialsData.length > 0) {
+                document.getElementById('materials-tbody').innerHTML = '';
+                product.materialsData.forEach(material => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td class="product-name-col"><input type="text" class="form-control-modern material-name" value="${material.name}" required></td>
+                        <td><input type="number" class="form-control-modern material-count" value="${material.count}" required></td>
+                        <td class="price-input-container"><input type="number" class="form-control-modern material-price" value="${material.price}" step="0.001" required></td>
+                        <td><input type="number" class="form-control-modern material-used" value="${material.used}" required></td>
+                        <td class="material-cost">${material.cost}</td>
+                        <td><button class="btn btn-danger-modern btn-action remove-row"><i class="bi bi-trash"></i></button></td>`;
+                    document.getElementById('materials-tbody').appendChild(newRow);
+                    setupRowEvents(newRow);
+                });
+            }
+            
+            // تعبئة بيانات التغليف
+            if (product.packagingData && product.packagingData.length > 0) {
+                document.getElementById('packaging-tbody').innerHTML = '';
+                product.packagingData.forEach(packaging => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td class="product-name-col"><input type="text" class="form-control-modern packaging-name" value="${packaging.name}" required></td>
+                        <td><input type="number" class="form-control-modern packaging-count" value="${packaging.count}" required></td>
+                        <td class="price-input-container"><input type="number" class="form-control-modern packaging-price" value="${packaging.price}" step="0.001" required></td>
+                        <td><input type="number" class="form-control-modern packaging-used" value="${packaging.used}" required></td>
+                        <td class="packaging-cost">${packaging.cost}</td>
+                        <td><button class="btn btn-danger-modern btn-action remove-row"><i class="bi bi-trash"></i></button></td>`;
+                    document.getElementById('packaging-tbody').appendChild(newRow);
+                    setupRowEvents(newRow);
+                });
             }
             
             updateCosts();
@@ -1233,7 +1275,39 @@
             const finalPrice=document.getElementById('final-price-input').value;
             const depreciationRate=document.getElementById('depreciation-rate').value;
             
-            // جمع بيانات إضافية للحفظ
+            // جمع بيانات المواد
+            const materialsData = [];
+            document.querySelectorAll('#materials-tbody tr').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                materialsData.push({
+                    name: inputs[0].value,
+                    count: inputs[1].value,
+                    price: inputs[2].value,
+                    used: inputs[3].value,
+                    cost: row.querySelector('.material-cost').textContent
+                });
+            });
+            
+            // جمع بيانات التغليف
+            const packagingData = [];
+            document.querySelectorAll('#packaging-tbody tr').forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                packagingData.push({
+                    name: inputs[0].value,
+                    count: inputs[1].value,
+                    price: inputs[2].value,
+                    used: inputs[3].value,
+                    cost: row.querySelector('.packaging-cost').textContent
+                });
+            });
+            
+            // جمع بيانات اليد العاملة
+            const laborData = {
+                salary: document.querySelector('.salary').value,
+                hours: document.querySelector('.hours').value,
+                pieces: document.querySelector('.pieces').value
+            };
+            
             const product = {
                 code: code,
                 name: name,
@@ -1248,12 +1322,10 @@
                 laborCost: document.getElementById('labor-summary').textContent,
                 depreciationCost: document.getElementById('depreciation-summary').textContent,
                 depreciationRate: depreciationRate,
-                // حفظ بيانات اليد العاملة
-                laborData: {
-                    salary: document.querySelector('.salary').value,
-                    hours: document.querySelector('.hours').value,
-                    pieces: document.querySelector('.pieces').value
-                }
+                // حفظ البيانات التفصيلية
+                materialsData: materialsData,
+                packagingData: packagingData,
+                laborData: laborData
             };
             
             if(editingIndex >= 0) {
